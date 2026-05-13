@@ -1,1 +1,0 @@
-# lecture26_database
