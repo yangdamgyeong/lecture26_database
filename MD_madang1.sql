@@ -320,3 +320,53 @@ WHERE (극장번호,상영관번호) IN (SELECT 극장번호,상영관번호 FRO
 SELECT 이름
 FROM 고객
 WHERE 고객번호 IN (SELECT 고객번호 FROM 예약 GROUP BY 고객번호 HAVING COUNT(*) >= 2);
+
+--31.  고객 테이블에서 예약 테이블에 본인 고객번호로 예약 기록이 존재하는 고객의 이름을 조회하시오. (EXISTS 사용)
+SELECT 이름
+FROM 고객
+WHERE EXISTS (SELECT 고객번호 FROM 예약 WHERE 고객.고객번호 = 예약.고객번호);
+
+--32. 상영관 테이블에서 같은 극장 내 상영관들의 평균 가격보다 비싼 상영관의 영화제목과 가격을 조회하시오.
+SELECT t1.영화제목, t1.가격
+FROM 상영관 t1
+WHERE t1.가격 > (SELECT AVG(t2.가격) FROM 상영관 t2 WHERE t2.극장번호 = t1.극장번호);
+
+--33. 극장 테이블에서 해당 극장에 예약된 건수가 5건 이상인 극장의 극장이름을 조회하시오.
+SELECT 극장이름
+FROM 극장 
+WHERE 극장번호 IN (SELECT 극장번호 FROM 예약 GROUP BY 극장번호 HAVING COUNT(*) >= 5);
+
+--34.고객 테이블에서 예약 테이블에 본인 고객번호로 예약한 좌석번호가 'A1'인 기록이 존재하는 고객의 이름을 조회하시오.
+SELECT 이름
+FROM 고객
+WHERE 고객번호 IN (SELECT 고객번호 FROM 예약 WHERE 좌석번호 LIKE '%A1%');
+
+--35. 상영관 테이블에서 해당 상영관에 예약된 기록이 하나도 없는 상영관의 영화제목을 조회하시오. (NOT EXISTS 사용)
+SELECT 영화제목
+FROM 상영관
+WHERE NOT EXISTS (SELECT 극장번호 FROM 예약 WHERE 예약.극장번호 = 상영관.극장번호 AND 예약.상영관번호 = 상영관.상영관번호);
+
+--36. 예약 테이블에서 같은 고객이 동일 날짜에 두 건 이상 예약한 고객번호와 날짜를 조회하시오.
+SELECT 고객번호, 날짜
+FROM 예약
+WHERE 날짜 IN (SELECT 날짜 FROM 예약 GROUP BY 날짜 HAVING COUNT(*) >=2);
+
+--37. 극장 테이블에서 소속된 모든 상영관의 가격이 10000원 이상인 극장의 극장이름을 조회하시오. (NOT EXISTS 활용)
+SELECT 극장이름
+FROM 극장
+WHERE NOT EXISTS (SELECT 가격 FROM 상영관 WHERE 상영관.극장번호 = 극장.극장번호 AND 상영관.가격 < 10000);
+
+--38. 고객 테이블에서 예약 테이블에 서로 다른 극장에 2곳 이상 예약한 고객의 이름을 조회하시오.
+SELECT 이름
+FROM 고객
+WHERE 고객번호 IN (SELECT 고객번호 FROM 예약 GROUP BY 고객번호 HAVING COUNT(DISTINCT 극장번호) >=2);
+
+--39. 상영관 테이블에서 같은 극장 내에서 좌석수가 가장 많은 상영관의 영화제목을 조회하시오.
+SELECT 영화제목
+FROM 상영관 t1
+WHERE 좌석수 = (SELECT MAX(좌석수) FROM 상영관 t2 WHERE t2.극장번호 = t1.극장번호);
+
+--40. 고객 테이블에서 가장 최근 날짜에 예약한 고객의 이름을 조회하시오.
+SELECT 이름
+FROM 고객
+WHERE 고객번호 IN(SELECT 고객번호 FROM 예약 WHERE 날짜 IN (SELECT MAX(날짜) FROM 예약));
